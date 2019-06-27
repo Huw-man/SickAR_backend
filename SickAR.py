@@ -32,8 +32,10 @@ def get(barcode):
     :return:
     """
     json_response = NetworkRequest.send_request(barcode)
-    item = Item(json_response["results"])
-    cache.add_item(barcode, item)
+    if len(json_response["results"]) > 0:
+        # only add item if response contains data
+        item = Item(json_response["results"])
+        cache.add_item(barcode, item)
     NetworkRequest.send_request_pictures(item, barcode)
     return make_response(jsonify(json_response), 200)
 
@@ -64,4 +66,5 @@ def get_pictures(barcode):
 
 if __name__ == '__main__':
     # print(__name__)
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host="192.168.0.221", debug=True)
