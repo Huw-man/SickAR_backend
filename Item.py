@@ -1,0 +1,100 @@
+from datetime import datetime
+
+
+def sort_systems_by_date(data_array):
+    """
+    Sort the data_array by system using the objectScanTime
+
+    objectScanTime is of format "2019-05-21T21:21:31.591Z"
+    We use up to the second but no millisecond (ex. .591Z is not included)
+
+    :param data_array:
+    :return: sorted array of systems by date
+    """
+    return sorted(data_array,
+                  key=lambda e: datetime.strptime(e["objectScanTime"][:-5], "%Y-%m-%dT%H:%M:%S"))
+
+
+class Item:
+    """Item class to hold data for a single package item"""
+
+    def __init__(self, data_array):
+        """
+        Initialize an Item object given the full data array from the JSON response
+
+        :param data_array:
+        """
+
+        self.num_systems = len(data_array)
+        self.data = sort_systems_by_date(data_array)
+        self.systems = [sys["systemId"] for sys in self.data]
+        # by default we take the latest system
+        self.system_idx = 0
+
+        # dict of pics
+        # keys are the system the pictures were from and the values are another
+        # dictionary of device_id's to pictures
+        self.pics = {}
+
+    def get_systems(self):
+        """
+        Returns a list of systems that have data about this item.
+        The list is sorted from latest to oldest system.
+        """
+        return self.systems
+
+    def set_latest(self):
+        """
+        Sets the system to be the latest one and all the get_ methods
+        will retrieve from the latest system.
+        The latest system is at index 0
+        """
+        self.system_idx = 0
+
+    def set_oldest(self):
+        """
+        Sets the system to be the oldest one and all the get_ methods
+        will retrieve from the oldest system.
+        The oldest system is at index the last index
+        """
+        self.system_idx = -1
+
+    def set_system(self, system_id):
+        """
+        Sets the system to be a particular system and all the get_ methods
+        will retrieve from that system.
+        """
+        self.system_idx = self.systems.index(system_id)
+
+    def get_id(self):
+        return self.data[self.system_idx]["id"]
+
+    def get_devices(self):
+        return self.data[self.system_idx]["devices"]
+
+    def get_objectScanTime(self):
+        return self.data[self.system_idx]["objectScanTime"]
+
+    def add_pictures_from_system(self, system_id, pictures):
+        self.pics[system_id] = pictures
+
+    def get_pictures(self):
+        """
+        The following is an example of the picture dictionary structure.
+        The system_id is mapped to another dictionary containing the
+        device_id mapped to pictures.
+
+        The following id's are made up but you can get the actual ones from the item data
+        {
+            "1": {
+                "1": <picture base 64 string>,
+                "15": <picture base 64 string>,
+                "16": <picture base 64 string>,
+                ...
+            }
+            "3": {
+                ...
+            }
+        }
+        """
+        return self.pics
