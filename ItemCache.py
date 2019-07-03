@@ -10,4 +10,4 @@ class ItemCache:
         self.data[barcode] = item
 
     def get_item(self, barcode):
-        return self.data[barcode]
+        return self.data.get(barcode, None)

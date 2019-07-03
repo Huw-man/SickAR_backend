@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from flask import jsonify
+
 
 def sort_systems_by_date(data_array):
     """
@@ -12,7 +14,8 @@ def sort_systems_by_date(data_array):
     :return: sorted array of systems by date
     """
     return sorted(data_array,
-                  key=lambda e: datetime.strptime(e["objectScanTime"][:-5], "%Y-%m-%dT%H:%M:%S"))
+                  key=lambda e: datetime.strptime(e["objectScanTime"][:-5], "%Y-%m-%dT%H:%M:%S"),
+                  reverse=True)
 
 
 class Item:
@@ -36,7 +39,7 @@ class Item:
         # dictionary of device_id's to pictures
         self.pics = {}
 
-    def get_systems(self):
+    def get_system_ids(self):
         """
         Returns a list of systems that have data about this item.
         The list is sorted from latest to oldest system.
@@ -86,15 +89,22 @@ class Item:
 
         The following id's are made up but you can get the actual ones from the item data
         {
-            "1": {
-                "1": <picture base 64 string>,
-                "15": <picture base 64 string>,
-                "16": <picture base 64 string>,
+            "1" : {
+                "1" : <picture base 64 string>,
+                "15" : <picture base 64 string>,
+                "16" : <picture base 64 string>,
                 ...
             }
-            "3": {
+            "3" : {
                 ...
             }
         }
         """
         return self.pics
+
+    def get_data_json(self):
+        resp = {
+            "results": self.data,
+            "systems": self.systems
+        }
+        return jsonify(resp)

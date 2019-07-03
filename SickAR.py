@@ -21,7 +21,12 @@ def tamper(barcode):
     :return True if item has been damaged false otherwise
     """
     # TODO: implement damage/tamper detection
-    return True
+    response = {
+        "tamper": True,
+        "systemId": 1
+    }
+
+    return make_response(jsonify(response), 200)
 
 
 @app.route('/get/<string:barcode>')
@@ -36,8 +41,10 @@ def get(barcode):
         # only add item if response contains data
         item = Item(json_response["results"])
         cache.add_item(barcode, item)
-    NetworkRequest.send_request_pictures(item, barcode)
-    return make_response(jsonify(json_response), 200)
+        NetworkRequest.send_request_pictures(item, barcode)
+        return make_response(item.get_data_json(), 200)
+    else:
+        return make_response(jsonify(json_response), 200)
 
 
 @app.route('/get_pictures/<string:barcode>')
@@ -60,7 +67,6 @@ def get_pictures(barcode):
         resp["results"] = None
     else:
         resp["results"] = item.get_pictures()
-
     return make_response(jsonify(resp), 200)
 
 

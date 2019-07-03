@@ -36,9 +36,11 @@ class NetworkRequest:
     @staticmethod
     def send_request_pictures(item, barcode):
         devices = item.get_devices()
+        # print(len(item.data))
         # print(devices)
-        for system_id in item.get_systems():
+        for system_id in item.get_system_ids():
             pictures = {}
+            item.set_system(system_id)
             for device in devices:
                 url = PIC_API_ENDPOINT \
                       + str(system_id) \
@@ -47,6 +49,7 @@ class NetworkRequest:
                       + "/media/img-sm"
                 payload = {"objectScanTime": item.get_objectScanTime(), "mode": "", "locale": "en-US"}
                 r = requests.get(url, params=payload)
+                # print(r.url)
 
                 img_data = r.json()["data"]
                 if img_data is not None:
