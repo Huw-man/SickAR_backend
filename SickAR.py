@@ -3,6 +3,7 @@ from flask import Flask, make_response, jsonify
 from Item import Item
 from ItemCache import ItemCache
 from NetworkRequest import NetworkRequest
+from TamperDetector import TamperDetector
 
 app = Flask(__name__)
 cache = ItemCache()
@@ -20,11 +21,9 @@ def tamper(barcode):
 
     :return True if item has been damaged false otherwise
     """
-    # TODO: implement damage/tamper detection
-    response = {
-        "tamper": True,
-        "systemId": 1
-    }
+
+    item = cache.get_item(barcode)
+    response = TamperDetector.detect(item)
 
     return make_response(jsonify(response), 200)
 
