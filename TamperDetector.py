@@ -42,7 +42,7 @@ class TamperDetector:
                     tamper = True
                     damage_system = system["systemId"]
 
-            if base_system["weight"]["value"] > 0:
+            if base_system["weight"]["value"] is not None and base_system["weight"]["value"] > 0:
                 diff_weight = base_system["weight"]["value"] - system["weight"]["value"]
                 if diff_weight / base_system["weight"]["value"] > 0.05:
                     tamper = True

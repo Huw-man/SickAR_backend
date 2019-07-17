@@ -2,11 +2,9 @@ from datetime import datetime, timedelta
 
 import requests
 
-API_ENDPOINT = "http://10.102.11.96:8080/search/execute?offset=0&size=5&locale=en-US"
-PIC_API_ENDPOINT = "http://10.102.11.96:8080/system/"
+from Constants import API_ENDPOINT, PIC_API_ENDPOINT, SYSTEM_CONFIG_API_ENDPOINT
 
 
-# "http://10.102.11.96:8080/system/3/object/{id}/device/{results[""0""].devices[""0""].deviceNumber}/media/img-sm?objectScanTime={objectScanTime}&mode=&locale=en-US"
 class NetworkRequest:
     """
     Constructs the Network request to SICK analytics for package data
@@ -17,7 +15,7 @@ class NetworkRequest:
     def send_request(barcode):
         # search within the past week
         endDate = datetime.utcnow()
-        startDate = endDate - timedelta(days=7)
+        startDate = endDate - timedelta(days=20)
         # construct body of post request
         body = {
             "type": "byBarcode",
@@ -60,6 +58,20 @@ class NetworkRequest:
                     #     f.write(imgdata)
             item.add_pictures_from_system(system_id, pictures)
         return
+
+    @staticmethod
+    def send_request_system_config():
+        r = requests.get(SYSTEM_CONFIG_API_ENDPOINT)
+        json = r.json()
+        processed = {}
+
+        for system in json["systemList"]:
+            device_map = {}
+            for device in system["assignedDevices"]:
+                device_map[device["deviceId"]] = device["deviceName"]
+            processed[system["systemId"]] = device_map
+        return processed
+
 
 # r = NetworkRequest.send_request("1Z9Y82570410907110")
 # print(r)

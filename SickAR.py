@@ -36,7 +36,8 @@ def get(barcode):
     :return:
     """
     json_response = NetworkRequest.send_request(barcode)
-    if len(json_response["results"]) > 0:
+    print(json_response)
+    if json_response is not None and "results" in json_response and json_response["results"]:
         # only add item if response contains data
         item = Item(json_response["results"])
         cache.add_item(barcode, item)
@@ -66,7 +67,33 @@ def get_pictures(barcode):
         resp["results"] = None
     else:
         resp["results"] = item.get_pictures()
+    print(resp)
     return make_response(jsonify(resp), 200)
+
+
+@app.route('/get_system_config')
+def get_system_config():
+    """
+    Gets the system configuration for facility 1 (defined in the url endpoint)
+    returns a dictionary that maps system to another map of deviceId to deviceName
+
+    :return: see example below
+        {
+            "1": {
+                "1": "Top",
+                "2": "LF",
+                "3": "LB",
+                "4": "RB",
+                "5": "RF",
+                "6": "Bot",
+                "7": "CLV1",
+                "8": "CLV2",
+                "9": "MSC800"
+            },
+        ...
+        }
+    """
+    return make_response(jsonify(NetworkRequest.send_request_system_config()))
 
 
 if __name__ == '__main__':
