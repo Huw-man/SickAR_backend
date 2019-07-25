@@ -6,7 +6,6 @@ from NetworkRequest import NetworkRequest
 from TamperDetector import TamperDetector
 
 app = Flask(__name__)
-cache = ItemCache()
 
 
 @app.route('/')
@@ -22,7 +21,7 @@ def tamper(barcode):
     :return True if item has been damaged false otherwise
     """
 
-    item = cache.get_item(barcode)
+    item = ItemCache.get_instance().get_item(barcode)
     response = TamperDetector.detect(item)
 
     return make_response(jsonify(response), 200)
@@ -36,12 +35,13 @@ def get(barcode):
     :return:
     """
     json_response = NetworkRequest.send_request(barcode)
-    print(json_response)
+    # print(json_response)
     if json_response is not None and "results" in json_response and json_response["results"]:
         # only add item if response contains data
         item = Item(json_response["results"])
-        cache.add_item(barcode, item)
-        NetworkRequest.send_request_pictures(item, barcode)
+        ItemCache.get_instance().add_item(barcode, item)
+        # NetworkRequest.send_request_pictures(item, barcode)
+        # print("sending picture request")
         return make_response(item.get_data_json(), 200)
     else:
         return make_response(jsonify(json_response), 200)
@@ -62,12 +62,12 @@ def get_pictures(barcode):
     }
     """
     resp = {}
-    item = cache.get_item(barcode)
+    item = ItemCache.get_instance().get_item(barcode)
     if item is None:
         resp["results"] = None
     else:
-        resp["results"] = item.get_pictures()
-    print(resp)
+        resp["results"] = NetworkRequest.send_request_pictures(item)
+    # print(resp)
     return make_response(jsonify(resp), 200)
 
 
@@ -88,7 +88,6 @@ def get_system_config():
                 "6": "Bot",
                 "7": "CLV1",
                 "8": "CLV2",
-                "9": "MSC800"
             },
         ...
         }

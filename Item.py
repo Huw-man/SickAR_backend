@@ -5,7 +5,8 @@ from flask import jsonify
 
 def sort_systems_by_date(data_array):
     """
-    Sort the data_array by system using the objectScanTime
+    Sort the data_array by system using the objectScanTime and remove repeat instances of the same system data
+    Keeps only the most recent system if there are multiple
 
     objectScanTime is of format "2019-05-21T21:21:31.591Z"
     We use up to the second but no millisecond (ex. .591Z is not included)
@@ -13,9 +14,19 @@ def sort_systems_by_date(data_array):
     :param data_array:
     :return: sorted array of systems by date
     """
-    return sorted(data_array,
-                  key=lambda e: datetime.strptime(e["objectScanTime"][:-5], "%Y-%m-%dT%H:%M:%S"),
-                  reverse=True)
+    sorted_data = sorted(data_array,
+                         key=lambda system: datetime.strptime(system["objectScanTime"][:-5], "%Y-%m-%dT%H:%M:%S"),
+                         reverse=True)
+    # remove repeat systems and take only the most recent system if there are multiple instances of the same system
+    seen = set()
+    no_repeats_data = []
+    for system_of_date in sorted_data:
+        sys_id = system_of_date["systemId"]
+        if sys_id not in seen:
+            seen.add(sys_id)
+            no_repeats_data.append(system_of_date)
+
+    return no_repeats_data
 
 
 class Item:
