@@ -34,7 +34,6 @@ class NetworkRequest:
 
     @staticmethod
     def send_request_pictures(item):
-        devices = item.get_devices()
         # print(len(item.data))
         # print(devices)
         for system_id in item.get_system_ids():

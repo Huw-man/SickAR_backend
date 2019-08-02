@@ -115,7 +115,7 @@ class Item:
 
     def get_data_json(self):
         resp = {
-            "results": self.data,
-            "systems": self.systems
+            "systems": self.systems,
+            "results": self.data
         }
         return jsonify(resp)

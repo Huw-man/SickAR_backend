@@ -39,6 +39,7 @@ class TamperDetector:
             local_tamper_flag = False
             local_tamper_properties = []
 
+            length_unit = system['length']['unitLabel']
             # examine dimensions
             for i in range(3):
                 diff = base_dims[i] - dims[i]
@@ -46,15 +47,18 @@ class TamperDetector:
                     # detect damage is difference greater than 5%
                     tamper = True
                     local_tamper_flag = True
-                    local_tamper_properties.append(base_values_to_labels[base_dims[i]])
+                    local_tamper_properties.append([base_values_to_labels[base_dims[i]], str(round(diff, 2))
+                                                    + " " + length_unit])
 
             # examine weight
             if base_system["weight"]["value"] is not None and base_system["weight"]["value"] > 0:
+                weight_unit = system['weight']['unitLabel']
                 diff_weight = base_system["weight"]["value"] - system["weight"]["value"]
                 if diff_weight / base_system["weight"]["value"] > 0.05:
                     tamper = True
                     local_tamper_flag = True
-                    local_tamper_properties.append("weight")
+                    local_tamper_properties.append(["weight", str(round(diff_weight, 2))
+                                                    + " " + weight_unit])
 
             if local_tamper_flag:
                 damage_info[system["systemId"]] = local_tamper_properties
