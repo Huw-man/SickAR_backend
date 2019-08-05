@@ -1,5 +1,7 @@
 from Item import Item
 
+tamper_threshold = 0.05
+
 
 def get_sorted_dimension_list(system):
     dims_list = []
@@ -9,6 +11,10 @@ def get_sorted_dimension_list(system):
         values_to_labels[system[label]["value"]] = label
     dims_list.sort()
     return dims_list, values_to_labels
+
+
+def print_sign(diff):
+    return "-" if diff > 0 else "+"
 
 
 class TamperDetector:
@@ -33,6 +39,8 @@ class TamperDetector:
 
         tamper = False
         damage_info = {}
+        system_order = []
+        # print(item.data)
         for system in item.data:
             # sort the length, width, and height before comparing them
             dims = get_sorted_dimension_list(system)[0]
@@ -43,24 +51,30 @@ class TamperDetector:
             # examine dimensions
             for i in range(3):
                 diff = base_dims[i] - dims[i]
-                if diff / base_dims[i] > 0.05:
+                if diff / base_dims[i] > tamper_threshold:
                     # detect damage is difference greater than 5%
                     tamper = True
                     local_tamper_flag = True
-                    local_tamper_properties.append([base_values_to_labels[base_dims[i]], str(round(diff, 2))
-                                                    + " " + length_unit])
+                    local_tamper_properties.append(base_values_to_labels[base_dims[i]] + "(" + print_sign(diff) +
+                                                   str(round(diff, 2)) + " " + length_unit + ")")
+                    # local_tamper_properties.append(
+                    #     [base_values_to_labels[base_dims[i]], str(round(diff, 2))
+                    #      + " " + length_unit])
 
             # examine weight
             if base_system["weight"]["value"] is not None and base_system["weight"]["value"] > 0:
                 weight_unit = system['weight']['unitLabel']
                 diff_weight = base_system["weight"]["value"] - system["weight"]["value"]
-                if diff_weight / base_system["weight"]["value"] > 0.05:
+                if diff_weight / base_system["weight"]["value"] > tamper_threshold:
                     tamper = True
                     local_tamper_flag = True
-                    local_tamper_properties.append(["weight", str(round(diff_weight, 2))
-                                                    + " " + weight_unit])
-
+                    local_tamper_properties.append("weight(" + print_sign(diff_weight) + str(round(diff_weight, 2))
+                                                   + " " + weight_unit + ")")
+                    # local_tamper_properties.append(["weight", str(round(diff_weight, 2))
+                    #                                 + " " + weight_unit])
             if local_tamper_flag:
+                # print(system["systemId"])
+                system_order.append(system["systemId"])
                 damage_info[system["systemId"]] = local_tamper_properties
 
             # diff_box_factor = base_system["boxFactor"] - system["boxFactor"]
@@ -70,9 +84,11 @@ class TamperDetector:
 
         # return dict for JSON response
         if tamper:
+            # print(damage_info)
             return {
                 "tamper": True,
-                "tamperDetails": damage_info
+                "tamperDetails": damage_info,
+                "tamperOrder": system_order
             }
         else:
             return {
