@@ -1,16 +1,16 @@
-from flask import Flask, make_response, jsonify
+from flask import Flask, make_response, jsonify, render_template
 
 from Item import Item
 from ItemCache import ItemCache
 from NetworkRequest import NetworkRequest
 from TamperDetector import TamperDetector
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 
 @app.route('/')
 def landing():
-    return 'SickAR backend service.'
+    return render_template('index.html')
 
 
 @app.route('/tamper/<string:barcode>')
@@ -30,9 +30,18 @@ def tamper(barcode):
 @app.route('/get/<string:barcode>')
 def get(barcode):
     """
-    fetch the data from Sick AN service and fetch pictures too
+    fetch the data from SICK Package Analytics
+
     :param barcode:
-    :return:
+    :return: {
+        results : {
+            <system data from package analytics>
+            }
+        systems: {
+            <chronological order of systems for this item sorted from latest to oldest>
+            }
+        }
+    }
     """
     json_response = NetworkRequest.send_request(barcode)
     # print(json_response)

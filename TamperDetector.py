@@ -1,9 +1,20 @@
+import Constants
 from Item import Item
-
-tamper_threshold = 0.05
 
 
 def get_sorted_dimension_list(system):
+    """
+    Sorts the dimensions of a particular system
+    Also provides a map for which values are which labels
+    Ex. {
+            54.3 : "length"
+            34.7 : "width"
+            23.9 : "height"
+        }
+
+    :param system:
+    :return: tuple (sorted dimensions, values_to_label_dict)
+    """
     dims_list = []
     values_to_labels = {}
     for label in ["length", "width", "height"]:
@@ -14,6 +25,9 @@ def get_sorted_dimension_list(system):
 
 
 def print_sign(diff):
+    """
+    :return sign according to diff
+    """
     return "-" if diff > 0 else "+"
 
 
@@ -25,8 +39,9 @@ class TamperDetector:
     @staticmethod
     def detect(item: Item):
         """
-        An item is identified as damaged is on of its dimension properties
+        An item is identified as damaged if on of its dimension properties
         changes by more than 5% of its original value
+
         :param item:
         :return: dict
         """
@@ -51,7 +66,7 @@ class TamperDetector:
             # examine dimensions
             for i in range(3):
                 diff = base_dims[i] - dims[i]
-                if diff / base_dims[i] > tamper_threshold:
+                if diff / base_dims[i] > Constants.tamper_threshold:
                     # detect damage is difference greater than 5%
                     tamper = True
                     local_tamper_flag = True
@@ -65,13 +80,15 @@ class TamperDetector:
             if base_system["weight"]["value"] is not None and base_system["weight"]["value"] > 0:
                 weight_unit = system['weight']['unitLabel']
                 diff_weight = base_system["weight"]["value"] - system["weight"]["value"]
-                if diff_weight / base_system["weight"]["value"] > tamper_threshold:
+                if diff_weight / base_system["weight"]["value"] > Constants.tamper_threshold:
                     tamper = True
                     local_tamper_flag = True
                     local_tamper_properties.append("weight(" + print_sign(diff_weight) + str(round(diff_weight, 2))
                                                    + " " + weight_unit + ")")
                     # local_tamper_properties.append(["weight", str(round(diff_weight, 2))
                     #                                 + " " + weight_unit])
+
+            # if tamper has been detected add that information to the response
             if local_tamper_flag:
                 # print(system["systemId"])
                 system_order.append(system["systemId"])

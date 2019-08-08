@@ -1,5 +1,9 @@
 class ItemCache:
-    """ ItemCache holds the items requested by an application """
+    """
+    ItemCache holds the items requested by the client
+
+    This is a singleton class and can only be access via get_instance() function
+    """
 
     class __Cache:
         def __init__(self):

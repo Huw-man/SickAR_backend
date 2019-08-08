@@ -2,21 +2,28 @@ from datetime import datetime, timedelta
 
 import requests
 
+import Constants
 from Constants import API_ENDPOINT, PIC_API_ENDPOINT, SYSTEM_CONFIG_API_ENDPOINT
 from ItemCache import ItemCache
 
 
 class NetworkRequest:
     """
-    Constructs the Network request to SICK analytics for package data
+    Constructs the Network requests to SICK Package Analytics
     """
 
     # noinspection PyPep8Naming
     @staticmethod
     def send_request(barcode):
+        """
+        Send the API call to Package Analytics for the data of an item
+
+        :param barcode:
+        :return:
+        """
         # search within the past week
         endDate = datetime.utcnow()
-        startDate = endDate - timedelta(days=7)
+        startDate = endDate - timedelta(days=Constants.SEARCH_DAYS)
         # construct body of post request
         body = {
             "type": "byBarcode",
@@ -34,12 +41,18 @@ class NetworkRequest:
 
     @staticmethod
     def send_request_pictures(item):
-        # print(len(item.data))
-        # print(devices)
+        """
+        Send the request to the media server for the images associated with and
+        item.
+
+        :param item:
+        :return:
+        """
+        # iterate through all the systems
         for system_id in item.get_system_ids():
             pictures = {}
             item.set_system(system_id)
-
+            # iterate through all the devices of this system
             for device_id in ItemCache.get_instance().system_config[system_id].keys():
                 url = PIC_API_ENDPOINT \
                       + str(system_id) \
@@ -62,16 +75,26 @@ class NetworkRequest:
 
     @staticmethod
     def send_request_system_config():
+        """
+        Send the request for the system configuration of facility 1
+        The facility is specified in the SYSTEM_CONFIG_API_ENDPOINT
+
+        :return:
+        """
         r = requests.get(SYSTEM_CONFIG_API_ENDPOINT)
         json = r.json()
         # print(json)
         processed = {}
+        # iterate through systems
         for system in json["systemList"]:
             device_map = {}
+            # iterate through all the devices
+
             for device in system["assignedDevices"]:
                 if device["deviceType"]["readsBarcode"]:
                     device_map[device["deviceId"]] = device["deviceName"]
             processed[system["systemId"]] = device_map
+        # cache the configuration
         ItemCache.get_instance().set_system_config(processed)
         return processed
 

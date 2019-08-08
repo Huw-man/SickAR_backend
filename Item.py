@@ -81,16 +81,31 @@ class Item:
         self.system_idx = self.systems.index(system_id)
 
     def get_id(self):
+        """
+        Get the id for this item from the current system
+        """
         return self.data[self.system_idx]["id"]
 
     def get_devices(self):
+        """
+        (not used) The devices reported with an item are no used for fetching images anymore
+        """
         return self.data[self.system_idx]["devices"]
 
     def get_objectScanTime(self):
+        """
+        Get the object scan time for this item from the current system
+        """
         return self.data[self.system_idx]["objectScanTime"]
 
-    def add_pictures_from_system(self, system_id, pictures):
-        self.pics[system_id] = pictures
+    def add_pictures_from_system(self, system_id, images):
+        """
+        Add the images associated with this system
+
+        :param system_id:
+        :param images:
+        """
+        self.pics[system_id] = images
 
     def get_pictures(self):
         """
@@ -114,6 +129,11 @@ class Item:
         return self.pics
 
     def get_data_json(self):
+        """
+        Form the response to be send back to the client about the data of this item
+
+        :return: json data
+        """
         resp = {
             "systems": self.systems,
             "results": self.data
