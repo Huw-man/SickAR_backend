@@ -20,7 +20,7 @@ PIC_API_ENDPOINT = BASE_ENDPOINT + "/facility/1/system/"
 SYSTEM_CONFIG_API_ENDPOINT = BASE_ENDPOINT + "/config/facility/1/system?locale=en-US"
 
 # time window for how far in the past we should search for a barcode
-SEARCH_DAYS = 7
+SEARCH_DAYS = 14
 
 # threshold for tamper detection
 tamper_threshold = 0.05
