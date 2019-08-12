@@ -10,6 +10,9 @@ app = Flask(__name__, template_folder='templates')
 
 @app.route('/')
 def landing():
+    """
+    Landing page that describes the endpoints
+    """
     return render_template('index.html')
 
 
